@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/julienschmidt/httprouter"
@@ -55,7 +56,17 @@ func (c *Controller) Create(w http.ResponseWriter, r *http.Request, _ httprouter
 	}); err != nil {
 		c.logger.Error("inventory.Create Error", slog.Any("error", err))
 
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// http.Error(w, err.Error(), http.StatusInternalServerError)
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"message": http.StatusText(http.StatusUnprocessableEntity), "data": map[string]interface{}{}})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"message": http.StatusText(http.StatusInternalServerError), "data": map[string]interface{}{}})
 		return
 	}
 
