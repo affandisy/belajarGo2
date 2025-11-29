@@ -128,6 +128,18 @@ func main() {
 	router.PUT("/inventories/:code", inventoryCtrl.Update)
 	router.DELETE("/inventories/:code", inventoryCtrl.Delete)
 
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`("data":{}, "message":"route not found")`))
+	})
+
+	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte(`{"data":{}, "message":"method not allowed"}`))
+	})
+
 	router.PanicHandler = func(w http.ResponseWriter, r *http.Request, err interface{}) {
 		logger.Error("Panic Handler", slog.Any("error", err))
 		w.Header().Set("Content-Type", "application/json")

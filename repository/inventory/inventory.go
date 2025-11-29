@@ -26,7 +26,8 @@ func (r *GormRepository) Create(inv inventory.Inventory) (err error) {
 
 func (r *GormRepository) ReadAll(page int, limit int) (invs []inventory.Inventory, err error) {
 	ctx := context.Background()
-	r.DB.WithContext(ctx).Offset((page - 1) * limit).Limit(limit).Find(&invs)
+	// r.DB.WithContext(ctx).Offset((page - 1) * limit).Limit(limit).Find(&invs)
+	r.DB.WithContext(ctx).Order("code DESC").Offset((page - 1) * limit).Limit(limit).Find(&invs)
 	return
 }
 
@@ -36,10 +37,12 @@ func (r *GormRepository) ReadByCode(code string) (inv inventory.Inventory, err e
 	return
 }
 
-func (r *GormRepository) Update(code string) (err error) {
-	return
+func (r *GormRepository) Update(inv inventory.Inventory) (err error) {
+	ctx := context.Background()
+	return r.DB.WithContext(ctx).Where("code = ?", inv.Code).Save(inv).Error
 }
 
 func (r *GormRepository) Delete(code string) (err error) {
-	return
+	ctx := context.Background()
+	return r.DB.WithContext(ctx).Where("code = ?", code).Delete(inventory.Inventory{}).Error
 }

@@ -17,8 +17,8 @@ INSERT INTO inventories (code, name, stock, description, status) VALUES
 ('INV008', 'Router', 20, 'Wi-Fi 6 Dual-Band Router', 'active'),
 ('INV009', 'USB Hub', 85, '7-port powered USB hub', 'active'),
 ('INV010', 'External HDD', 15, '2TB Seagate USB 3.0 external hard drive', 'active'),
-('INV011', 'Projector', 5, 'Full HD business projector', 'inactive'),
-('INV012', 'Scanner', 8, 'Flatbed document scanner', 'inactive'),
+('INV011', 'Projector', 5, 'Full HD business projector', 'broken'),
+('INV012', 'Scanner', 8, 'Flatbed document scanner', 'broken'),
 ('INV013', 'Desk Lamp', 50, 'LED lamp with brightness control', 'active'),
 ('INV014', 'Headphones', 35, 'Noise-cancelling over-ear headphones', 'active'),
 ('INV015', 'Laptop Stand', 45, 'Adjustable aluminum laptop stand', 'active');
