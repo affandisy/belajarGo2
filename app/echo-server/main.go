@@ -1,6 +1,12 @@
 package main
 
 import (
+	invHandler "belajarGo2/app/echo-server/controller/inventory"
+	userController "belajarGo2/app/echo-server/controller/user"
+	invRepo "belajarGo2/repository/inventory"
+	userRepo "belajarGo2/repository/user"
+	invSvc "belajarGo2/service/inventory"
+	userService "belajarGo2/service/user"
 	"belajarGo2/util/database"
 	"context"
 	"log"
@@ -20,8 +26,9 @@ var loggerOption = slog.HandlerOptions{AddSource: true}
 var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 
 type Config struct {
-	AppHost string `env:"APP_HOST"`
-	AppPort string `env:"APP_PORT"`
+	AppHost      string `env:"APP_HOST"`
+	AppPort      string `env:"APP_PORT"`
+	AppJWTSecret string `env:"APP_JWT_SECRET"`
 
 	DBDriver        string `env:"DB_DRIVER"`
 	DBMySQLHost     string `env:"DB_MYSQL_HOST"`
@@ -62,11 +69,13 @@ func main() {
 		DBPostgreSQLName:     config.DBPostgreSQLName,
 	}
 
-	_ = databaseConfig.GetDatabaseConnection()
+	db := databaseConfig.GetDatabaseConnection()
 	logger.Info("Database client connected!")
 
 	// Setup server
 	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
 	e.Use(middleware.CORS())
 	e.Use(middleware.LoggerWithConfig(
@@ -88,6 +97,36 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	// inventory endpoint
+	inventoryRepo := invRepo.NewGormRepository(db)
+	inventorySvc := invSvc.NewService(inventoryRepo)
+	inventoryCtrl := invHandler.NewController(logger, inventorySvc)
+
+	// endpoint
+	// e.GET("/inventory", inventoryCtrl.GetAll)
+	// e.GET("/inventories/:code", inventoryCtrl.GetByCode)
+	// e.POST("/inventories", inventoryCtrl.Create)
+	// e.PUT("/inventories/:code", inventoryCtrl.Update)
+	// e.DELETE("/inventories/:code", inventoryCtrl.Delete)
+
+	// endpoint group inventory
+	inventoryEndpoint := e.Group("/inventories")
+	inventoryEndpoint.GET("", inventoryCtrl.GetAll)
+	inventoryEndpoint.GET("/:code", inventoryCtrl.GetByCode)
+	inventoryEndpoint.POST("", inventoryCtrl.Create)
+	inventoryEndpoint.PUT("/:code", inventoryCtrl.Update)
+	inventoryEndpoint.DELETE("/:code", inventoryCtrl.Delete)
+
+	// endpoint user
+	userRepo := userRepo.NewGormRepository(db)
+	userService := userService.NewService(logger, userRepo, config.AppJWTSecret)
+	userCtrl := userController.NewController(logger, userService)
+
+	// endpoint group user
+	userEndpoint := e.Group("/users")
+	userEndpoint.POST("/register", userCtrl.Register)
+	userEndpoint.POST("/login", userCtrl.Login)
 
 	// Start server
 	address := config.AppHost + ":" + config.AppPort

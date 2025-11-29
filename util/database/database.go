@@ -3,17 +3,17 @@ package database
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type Config struct {
-	DBDriver        string
+	DBDriver      string
+	DBEnableDebug bool
+
 	DBMySQLHost     string
 	DBMySQLPort     string
 	DBMySQLUser     string
@@ -30,25 +30,12 @@ type Config struct {
 }
 
 func (conf *Config) GetDatabaseConnection() *gorm.DB {
-	if conf.DBDriver == "postgres" {
-		dsn := fmt.Sprintf(
-			"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
-			conf.DBPostgreSQLHost,
-			conf.DBPostgreSQLPort,
-			conf.DBPostgreSQLUser,
-			conf.DBPostgreSQLPassword,
-			conf.DBPostgreSQLName,
-		)
+	var err error
+	var db *gorm.DB
+	// conf.DBEnableDebug = true
 
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: newDBLogger()})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return db.Debug()
-	}
-
-	if conf.DBDriver == "mysql" {
+	switch conf.DBDriver {
+	case "mysql":
 		dsn := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			conf.DBMySQLUser,
@@ -58,36 +45,39 @@ func (conf *Config) GetDatabaseConnection() *gorm.DB {
 			conf.DBMySQLName,
 		)
 
-		db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: newDBLogger()})
+		db, err = gorm.Open(mysql.Open(dsn))
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		return db.Debug()
-	}
-
-	if conf.DBDriver == "sqlite" {
-		db, err := gorm.Open(sqlite.Open(conf.DBSQLiteName), &gorm.Config{Logger: newDBLogger()})
+	case "sqlite":
+		db, err = gorm.Open(sqlite.Open(conf.DBSQLiteName))
 		if err != nil {
 			log.Fatal(err)
 		}
+	case "postgres":
+		dsn := fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+			conf.DBPostgreSQLHost,
+			conf.DBPostgreSQLPort,
+			conf.DBPostgreSQLUser,
+			conf.DBPostgreSQLPassword,
+			conf.DBPostgreSQLName,
+		)
+		db, err = gorm.Open(postgres.Open(dsn))
+		if err != nil {
+			log.Fatal(err)
+		}
+	default:
+		log.Fatal("unsupported driver")
+	}
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if conf.DBEnableDebug {
 		return db.Debug()
 	}
 
-	log.Fatal("unsupported driver")
-
-	return nil
-}
-
-func newDBLogger() logger.Interface {
-	return logger.New(
-		log.Default(),
-		logger.Config{
-			SlowThreshold:             30 * time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Silent,    // Log level
-			IgnoreRecordNotFoundError: false,            // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,            // Enable Color
-		},
-	)
+	return db
 }

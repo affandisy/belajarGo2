@@ -15,7 +15,8 @@ type (
 
 func NewGormRepository(db *gorm.DB) *GormRepository {
 	return &GormRepository{
-		db.Table("inventories"),
+		// db.Table("inventories"),
+		db.Table("bg_inventories"),
 	}
 }
 

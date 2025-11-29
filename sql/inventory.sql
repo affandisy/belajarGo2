@@ -1,4 +1,4 @@
-CREATE TABLE inventories (
+CREATE TABLE bg_inventories (
     code VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     stock INT NOT NULL DEFAULT 0,
@@ -6,7 +6,7 @@ CREATE TABLE inventories (
     status VARCHAR(50) NOT NULL DEFAULT ''
 )
 
-INSERT INTO inventories (code, name, stock, description, status) VALUES
+INSERT INTO bg_inventories (code, name, stock, description, status) VALUES
 ('INV001', 'Laptop', 25, 'Dell Latitude 5420', 'active'),
 ('INV002', 'Mouse', 100, 'Logitech wireless mouse', 'active'),
 ('INV003', 'Keyboard', 75, 'Mechanical keyboard with RGB lights', 'active'),
