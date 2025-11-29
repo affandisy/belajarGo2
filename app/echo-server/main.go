@@ -29,6 +29,14 @@ type Config struct {
 	DBMySQLUser     string `env:"DB_MYSQL_USER"`
 	DBMySQLPassword string `env:"DB_MYSQL_PASSWORD"`
 	DBMySQLName     string `env:"DB_MYSQL_NAME"`
+
+	DBSQLiteName string `env:"DB_SQLITE_NAME"`
+
+	DBPostgreSQLHost     string `env:"DB_POSTGRESQL_HOST"`
+	DBPostgreSQLPort     string `env:"DB_POSTGRESQL_PORT"`
+	DBPostgreSQLUser     string `env:"DB_POSTGRESQL_USER"`
+	DBPostgreSQLPassword string `env:"DB_POSTGRESQL_PASSWORD"`
+	DBPostgreSQLName     string `env:"DB_POSTGRESQL_NAME"`
 }
 
 func main() {
@@ -40,12 +48,18 @@ func main() {
 
 	// Init db connection
 	databaseConfig := database.Config{
-		DBDriver:        config.DBDriver,
-		DBMySQLHost:     config.DBMySQLHost,
-		DBMySQLPort:     config.DBMySQLPort,
-		DBMySQLUser:     config.DBMySQLUser,
-		DBMySQLPassword: config.DBMySQLPassword,
-		DBMySQLName:     config.DBMySQLName,
+		DBDriver:             config.DBDriver,
+		DBMySQLHost:          config.DBMySQLHost,
+		DBMySQLPort:          config.DBMySQLPort,
+		DBMySQLUser:          config.DBMySQLUser,
+		DBMySQLPassword:      config.DBMySQLPassword,
+		DBMySQLName:          config.DBMySQLName,
+		DBSQLiteName:         config.DBSQLiteName,
+		DBPostgreSQLHost:     config.DBPostgreSQLHost,
+		DBPostgreSQLPort:     config.DBPostgreSQLPort,
+		DBPostgreSQLUser:     config.DBPostgreSQLUser,
+		DBPostgreSQLPassword: config.DBPostgreSQLPassword,
+		DBPostgreSQLName:     config.DBPostgreSQLName,
 	}
 
 	_ = databaseConfig.GetDatabaseConnection()
