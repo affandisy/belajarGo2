@@ -3,6 +3,7 @@ package main
 import (
 	invHandler "belajarGo2/app/echo-server/controller/inventory"
 	userController "belajarGo2/app/echo-server/controller/user"
+	"belajarGo2/app/echo-server/router"
 	invRepo "belajarGo2/repository/inventory"
 	userRepo "belajarGo2/repository/user"
 	invSvc "belajarGo2/service/inventory"
@@ -111,12 +112,12 @@ func main() {
 	// e.DELETE("/inventories/:code", inventoryCtrl.Delete)
 
 	// endpoint group inventory
-	inventoryEndpoint := e.Group("/inventories")
-	inventoryEndpoint.GET("", inventoryCtrl.GetAll)
-	inventoryEndpoint.GET("/:code", inventoryCtrl.GetByCode)
-	inventoryEndpoint.POST("", inventoryCtrl.Create)
-	inventoryEndpoint.PUT("/:code", inventoryCtrl.Update)
-	inventoryEndpoint.DELETE("/:code", inventoryCtrl.Delete)
+	// inventoryEndpoint := e.Group("/inventories")
+	// inventoryEndpoint.GET("", inventoryCtrl.GetAll)
+	// inventoryEndpoint.GET("/:code", inventoryCtrl.GetByCode)
+	// inventoryEndpoint.POST("", inventoryCtrl.Create)
+	// inventoryEndpoint.PUT("/:code", inventoryCtrl.Update)
+	// inventoryEndpoint.DELETE("/:code", inventoryCtrl.Delete)
 
 	// endpoint user
 	userRepo := userRepo.NewGormRepository(db)
@@ -124,9 +125,11 @@ func main() {
 	userCtrl := userController.NewController(logger, userService)
 
 	// endpoint group user
-	userEndpoint := e.Group("/users")
-	userEndpoint.POST("/register", userCtrl.Register)
-	userEndpoint.POST("/login", userCtrl.Login)
+	// userEndpoint := e.Group("/users")
+	// userEndpoint.POST("/register", userCtrl.Register)
+	// userEndpoint.POST("/login", userCtrl.Login)
+
+	router.RegisterPath(e, config.AppJWTSecret, inventoryCtrl, userCtrl)
 
 	// Start server
 	address := config.AppHost + ":" + config.AppPort
