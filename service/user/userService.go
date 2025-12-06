@@ -1,7 +1,9 @@
 package user
 
 import (
+	"belajarGo2/service/notification"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -11,9 +13,10 @@ import (
 )
 
 type service struct {
-	logger  *slog.Logger
-	repo    Repository
-	jwtSign string
+	logger    *slog.Logger
+	repo      Repository
+	jwtSign   string
+	notifRepo notification.Repository
 }
 
 type Service interface {
@@ -22,13 +25,19 @@ type Service interface {
 	GetByEmail(email string) (user User, err error)
 }
 
-func NewService(logger *slog.Logger, repo Repository, jwtSign string) Service {
+func NewService(logger *slog.Logger, repo Repository, jwtSign string, notifRepo notification.Repository) Service {
 	return &service{
-		logger:  logger,
-		repo:    repo,
-		jwtSign: jwtSign,
+		logger:    logger,
+		repo:      repo,
+		jwtSign:   jwtSign,
+		notifRepo: notifRepo,
 	}
 }
+
+const (
+	SubjectRegisterAccount   = "Activate Your Account!"
+	EmailBodyRegisterAccount = `Halo, %v, Aktivasi akun anda dengan membuka tautan dibawah<br><br/>%v`
+)
 
 func (s *service) Register(user User) (id string, err error) {
 	// Find user by email
@@ -52,8 +61,16 @@ func (s *service) Register(user User) (id string, err error) {
 	user.Password = string(encPassword)
 	user.Role = "user"
 
+	if err = s.repo.Create(user); err != nil {
+		return
+	}
+
+	activationLink := "http://localhost:8080/users/verify-email"
+
+	_ = s.notifRepo.SendEmail(user.Fullname, user.Email, SubjectRegisterAccount, fmt.Sprintf(EmailBodyRegisterAccount, user.Fullname, activationLink))
+
 	// Create user
-	return "0", s.repo.Create(user)
+	return "0", nil
 }
 
 func (s *service) Login(email string, password string) (accessToken string, err error) {

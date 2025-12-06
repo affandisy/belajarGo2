@@ -50,4 +50,11 @@ func RegisterPath(e *echo.Echo, jwtSecret string, ctrlInv *inventory.Controller,
 	inventoryEndpoint.POST("", ctrlInv.Create, adminAccess)
 	inventoryEndpoint.PUT("/:code", ctrlInv.Update, adminAccess)
 	inventoryEndpoint.DELETE("/:code", ctrlInv.Delete, superadminAccess)
+
+	// Explore endpoint
+	echoJWT := middleware.JwtEchoMiddleware(jwtSecret)
+	exploreEndpoint := e.Group("/explore", echoJWT)
+	exploreEndpoint.GET("/rafly", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, echo.Map{"message": "testing"})
+	})
 }
