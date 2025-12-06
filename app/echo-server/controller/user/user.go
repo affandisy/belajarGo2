@@ -28,6 +28,17 @@ type userRegisterRequest struct {
 	Fullname string `json:"fullname" validate:"required"`
 }
 
+// Register godoc
+// @Summary      Register a new user
+// @Description  Create a new user account with email, password, and fullname
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body userRegisterRequest true "User registration request"
+// @Success      201 {object} map[string]interface{} "Created"
+// @Failure      400 {object} map[string]interface{} "Bad Request"
+// @Failure      500 {object} map[string]interface{} "Internal Server Error"
+// @Router       /users/register [post]
 func (ctrl *Controller) Register(c echo.Context) error {
 	request := new(userRegisterRequest)
 	if err := c.Bind(request); err != nil {
@@ -58,6 +69,18 @@ type userLoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+// Login godoc
+// @Summary      Login to system
+// @Description  Login to system and jwt/access token
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        request body userLoginRequest true "User login request"
+// @Success      200 {object} map[string]interface{} "Status OK"
+// @Failure      400 {object} map[string]interface{} "Bad Request"
+// @Failure      401 {object} map[string]interface{} "Unauthorized"
+// @Failure      500 {object} map[string]interface{} "Internal Server Error"
+// @Router       /users/login [post]
 func (ctrl *Controller) Login(c echo.Context) error {
 	request := new(userLoginRequest)
 	if err := c.Bind(request); err != nil {

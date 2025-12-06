@@ -21,6 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cfg "github.com/pobyzaarif/go-config"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 var loggerOption = slog.HandlerOptions{AddSource: true}
@@ -98,6 +99,9 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	// Swagger
+	e.GET("/swagger/*", echoSwagger.EchoWrapHandler())
 
 	// inventory endpoint
 	inventoryRepo := invRepo.NewGormRepository(db)
