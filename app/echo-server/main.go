@@ -28,9 +28,11 @@ var loggerOption = slog.HandlerOptions{AddSource: true}
 var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 
 type Config struct {
-	AppHost      string `env:"APP_HOST"`
-	AppPort      string `env:"APP_PORT"`
-	AppJWTSecret string `env:"APP_JWT_SECRET"`
+	AppHost                 string `env:"APP_HOST"`
+	AppPort                 string `env:"APP_PORT"`
+	AppDeploymentUrl        string `env:"APP_DEPLOYMENT_URL"`
+	AppEmailVerificationKey string `env:"APP_EMAIL_VERIFICATION_KEY"`
+	AppJWTSecret            string `env:"APP_JWT_SECRET"`
 
 	DBDriver        string `env:"DB_DRIVER"`
 	DBMySQLHost     string `env:"DB_MYSQL_HOST"`
@@ -125,7 +127,7 @@ func main() {
 
 	// endpoint user
 	userRepo := userRepo.NewGormRepository(db)
-	userService := userService.NewService(logger, userRepo, config.AppJWTSecret)
+	userService := userService.NewService(logger, userRepo, config.AppJWTSecret, config.AppEmailVerificationKey)
 	userCtrl := userController.NewController(logger, userService)
 
 	// endpoint group user

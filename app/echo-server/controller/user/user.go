@@ -93,11 +93,27 @@ func (ctrl *Controller) Login(c echo.Context) error {
 
 	accessToken, err := ctrl.userSvc.Login(request.Email, request.Password)
 	if err != nil {
-		if strings.Contains(err.Error(), "wrong email") {
-			return c.JSON(http.StatusUnauthorized, map[string]interface{}{"message": http.StatusText(http.StatusUnauthorized)})
+		// if strings.Contains(err.Error(), "wrong email") {
+		// 	return c.JSON(http.StatusUnauthorized, map[string]interface{}{"message": http.StatusText(http.StatusUnauthorized)})
+		if strings.Contains(err.Error(), "email address") {
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{"message": err.Error()})
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"message": http.StatusText(http.StatusInternalServerError)})
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"message": "OK", "data": accessToken})
+}
+
+func (ctrl *Controller) VerifyEmail(c echo.Context) error {
+	encCode := c.Param("code")
+
+	err := ctrl.userSvc.VerifyEmail(encCode)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid or expired") {
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{"message": err.Error()})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"message": http.StatusText(http.StatusInternalServerError)})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"message": "OK"})
 }

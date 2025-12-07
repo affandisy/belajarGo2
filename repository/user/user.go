@@ -27,3 +27,8 @@ func (r *GormRepository) GetByEmail(email string) (user user.User, err error) {
 	r.DB.WithContext(context.Background()).First(&user, "email = ?", email)
 	return
 }
+
+func (r *GormRepository) UpdateEmailVerification(user user.User) (err error) {
+	err = r.DB.WithContext(context.Background()).Updates(&user).Error
+	return
+}
