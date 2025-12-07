@@ -47,8 +47,9 @@ func NewService(logger *slog.Logger, repo Repository, appDeploymentUrl string, j
 }
 
 const (
-	SubjectRegisterAccount   = "Activate Your Account!"
-	EmailBodyRegisterAccount = `Halo, %v, Aktivasi akun anda dengan membuka tautan dibawah<br><br/>%v`
+	SubjectRegisterAccount = "Activate Your Account!"
+	// EmailBodyRegisterAccount = `Halo, %v, Aktivasi akun anda dengan membuka tautan dibawah<br><br/>%v`
+	EmailBodyRegisterAccount = `Halo, %v, Aktivasi akun anda dengan membuka tautan dibawah<br><br/>%v<br/>catatan: link hanya berlaku %v menit`
 )
 
 func (s *service) Register(user User) (id string, err error) {
@@ -85,7 +86,7 @@ func (s *service) Register(user User) (id string, err error) {
 	verificationCodeEncrypt, _ := goshortcute.AESCBCEncrypt([]byte(verificationCode), []byte(s.appEmailVerificationKey))
 	activationLink := s.appDeploymentUrl + "/users/email-verification/" + verificationCodeEncrypt
 
-	_ = s.notifRepo.SendEmail(user.Fullname, user.Email, SubjectRegisterAccount, fmt.Sprintf(EmailBodyRegisterAccount, user.Fullname, activationLink))
+	_ = s.notifRepo.SendEmail(user.Fullname, user.Email, SubjectRegisterAccount, fmt.Sprintf(EmailBodyRegisterAccount, user.Fullname, activationLink, verificationCodeTTL))
 
 	// Create user
 	return "0", nil
@@ -121,6 +122,11 @@ func (s *service) VerifyEmail(verificationCodeEncrypt string) (err error) {
 	if err != nil {
 		s.logger.Error("verify email err", slog.Any("err", err))
 		return err
+	}
+
+	if getUser.IsEmailVerified {
+		s.logger.Error("verify email err", slog.Any("err", "email already verified"))
+		return errors.New("invalid or expired url")
 	}
 
 	getUser.IsEmailVerified = true

@@ -5,6 +5,7 @@ import (
 	userController "belajarGo2/app/echo-server/controller/user"
 	"belajarGo2/app/echo-server/router"
 	invRepo "belajarGo2/repository/inventory"
+	"belajarGo2/repository/notification/mailjet"
 	userRepo "belajarGo2/repository/user"
 	invSvc "belajarGo2/service/inventory"
 	userService "belajarGo2/service/user"
@@ -48,6 +49,12 @@ type Config struct {
 	DBPostgreSQLUser     string `env:"DB_POSTGRESQL_USER"`
 	DBPostgreSQLPassword string `env:"DB_POSTGRESQL_PASSWORD"`
 	DBPostgreSQLName     string `env:"DB_POSTGRESQL_NAME"`
+
+	MailjetBaseUrl           string `env:"MAILJET_BASE_URL"`
+	MailjetBasicAuthUsername string `env:"MAILJET_BASIC_AUTH_USERNAME"`
+	MailjetBasicAuthPassword string `env:"MAILJET_BASIC_AUTH_PASSWORD"`
+	MailjetSenderEmail       string `env:"MAILJET_SENDER_EMAIL"`
+	MailjetSenderName        string `env:"MAILJET_SENDER_NAME"`
 }
 
 func main() {
@@ -105,6 +112,18 @@ func main() {
 	// Swagger
 	e.GET("/swagger/*", echoSwagger.EchoWrapHandler())
 
+	// notification
+	mailjetEmail := mailjet.NewMailjetRepository(
+		logger,
+		mailjet.MailjetConfig{
+			MailjetBaseURL:           config.MailjetBaseUrl,
+			MailjetBasicAuthUsername: config.MailjetBasicAuthUsername,
+			MailjetBasicAuthPassword: config.MailjetBasicAuthPassword,
+			MailjetSenderEmail:       config.MailjetSenderEmail,
+			MailjetSenderName:        config.MailjetSenderName,
+		},
+	)
+
 	// inventory endpoint
 	inventoryRepo := invRepo.NewGormRepository(db)
 	inventorySvc := invSvc.NewService(inventoryRepo)
@@ -127,7 +146,7 @@ func main() {
 
 	// endpoint user
 	userRepo := userRepo.NewGormRepository(db)
-	userService := userService.NewService(logger, userRepo, config.AppJWTSecret, config.AppEmailVerificationKey)
+	userService := userService.NewService(logger, userRepo, config.AppDeploymentUrl, config.AppJWTSecret, config.AppEmailVerificationKey, mailjetEmail)
 	userCtrl := userController.NewController(logger, userService)
 
 	// endpoint group user
