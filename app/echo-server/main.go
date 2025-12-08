@@ -50,6 +50,9 @@ type Config struct {
 	DBPostgreSQLPassword string `env:"DB_POSTGRESQL_PASSWORD"`
 	DBPostgreSQLName     string `env:"DB_POSTGRESQL_NAME"`
 
+	DBMongoURI  string `env:"DB_MONGO_URI"`
+	DBMongoName string `env:"DB_MONGO_NAME"`
+
 	MailjetBaseUrl           string `env:"MAILJET_BASE_URL"`
 	MailjetBasicAuthUsername string `env:"MAILJET_BASIC_AUTH_USERNAME"`
 	MailjetBasicAuthPassword string `env:"MAILJET_BASIC_AUTH_PASSWORD"`
@@ -78,6 +81,8 @@ func main() {
 		DBPostgreSQLUser:     config.DBPostgreSQLUser,
 		DBPostgreSQLPassword: config.DBPostgreSQLPassword,
 		DBPostgreSQLName:     config.DBPostgreSQLName,
+		DBMongoURI:           config.DBMongoURI,
+		DBMongoName:          config.DBMongoName,
 	}
 
 	db := databaseConfig.GetDatabaseConnection()
@@ -145,8 +150,13 @@ func main() {
 	// inventoryEndpoint.DELETE("/:code", inventoryCtrl.Delete)
 
 	// endpoint user
-	userRepo := userRepo.NewGormRepository(db)
-	userService := userService.NewService(logger, userRepo, config.AppDeploymentUrl, config.AppJWTSecret, config.AppEmailVerificationKey, mailjetEmail)
+	// userRepo := userRepo.NewGormRepository(db)
+
+	// using mongodb
+	dbMongo := databaseConfig.GetNoSQLDatabaseConnection()
+	userMongoRepo := userRepo.NewMongoRepository(dbMongo)
+
+	userService := userService.NewService(logger, userMongoRepo, config.AppDeploymentUrl, config.AppJWTSecret, config.AppEmailVerificationKey, mailjetEmail)
 	userCtrl := userController.NewController(logger, userService)
 
 	// endpoint group user

@@ -1,9 +1,13 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -27,6 +31,27 @@ type Config struct {
 	DBPostgreSQLName     string
 
 	DBSQLiteName string
+
+	DBMongoURI  string
+	DBMongoName string
+}
+
+func (conf *Config) GetNoSQLDatabaseConnection() *mongo.Database {
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(conf.DBMongoURI).SetServerAPIOptions(serverAPI)
+
+	// Create a new client and connect to the server
+	client, err := mongo.Connect(context.TODO(), opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Send a ping to confirm a successfull connection
+	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
+		log.Fatal(err)
+	}
+
+	return client.Database(conf.DBMongoName)
 }
 
 func (conf *Config) GetDatabaseConnection() *gorm.DB {
