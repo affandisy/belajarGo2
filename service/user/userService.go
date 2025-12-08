@@ -89,7 +89,7 @@ func (s *service) Register(user User) (id string, err error) {
 	_ = s.notifRepo.SendEmail(user.Fullname, user.Email, SubjectRegisterAccount, fmt.Sprintf(EmailBodyRegisterAccount, user.Fullname, activationLink, verificationCodeTTL))
 
 	// Create user
-	return "0", nil
+	return user.ID, nil
 }
 
 func (s *service) VerifyEmail(verificationCodeEncrypt string) (err error) {
