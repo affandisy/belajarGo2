@@ -2,7 +2,7 @@ package user
 
 type (
 	User struct {
-		ID              string `bson:"user_id`
+		ID              string `bson:"user_id"`
 		Email           string
 		Password        string
 		Fullname        string
