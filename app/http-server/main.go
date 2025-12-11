@@ -20,9 +20,10 @@ var loggerOption = slog.HandlerOptions{AddSource: true}
 var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 
 type Config struct {
-	AppHost string `env:"APP_HOST"`
 	// AppPort string `env:"APP_PORT"`
-	AppPort string `env:"APP_PORT_HTTP_SERVER"`
+	AppVersion string `env:"APP_VERSION"`
+	AppHost    string `env:"APP_HOST"`
+	AppPort    string `env:"APP_PORT_HTTP_SERVER"`
 
 	DBDriver        string `env:"DB_DRIVER"`
 	DBMySQLHost     string `env:"DB_MYSQL_HOST"`
@@ -60,6 +61,13 @@ func main() {
 
 	// Setup router
 	router := httprouter.New()
+
+	router.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": config.AppVersion})
+	})
+
 	router.GET("/ping", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

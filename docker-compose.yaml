@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile.echoserver
     container_name: p-echo-server
+    env_file:
+      - .env
     ports:
       - "9050:8000"
     restart: always
@@ -12,6 +14,8 @@ services:
       context: .
       dockerfile: Dockerfile.httpserver
     container_name: p-http-server
+    env_file:
+      - .env
     ports:
       - "9060:8001"
     restart: always

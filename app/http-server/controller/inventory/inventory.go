@@ -119,7 +119,8 @@ func (c *Controller) GetAll(w http.ResponseWriter, r *http.Request, _ httprouter
 func (c *Controller) GetByCode(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	code := p.ByName("code")
 	if code == "" {
-		http.Error(w, "code is required", http.StatusBadRequest)
+		// http.Error(w, "code is required", http.StatusBadRequest)
+		common.ErrorValidation(w, errors.New("code parameter is required"))
 		return
 	}
 

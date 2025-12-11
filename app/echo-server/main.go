@@ -31,6 +31,7 @@ var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 type Config struct {
 	// AppHost                 string `env:"APP_HOST"`
 	// AppPort                 string `env:"APP_PORT"`
+	AppVersion              string `env:"APP_VERSION"`
 	AppHost                 string `env:"APP_PHOST"`
 	AppPort                 string `env:"APP_PORT_ECHO_SERVER"`
 	AppDeploymentUrl        string `env:"APP_DEPLOYMENT_URL"`
@@ -87,7 +88,7 @@ func main() {
 		DBMongoName:          config.DBMongoName,
 	}
 
-	db := databaseConfig.GetDatabaseConnection()
+	// db := databaseConfig.GetDatabaseConnection()
 	logger.Info("Database client connected!")
 
 	// Setup server
@@ -110,9 +111,9 @@ func main() {
 	e.Pre(middleware.Recover())
 
 	// Setup routes
-	e.GET("/ping", func(c echo.Context) error {
+	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{
-			"message": "pong",
+			"message": config.AppVersion,
 		})
 	})
 
@@ -131,9 +132,13 @@ func main() {
 		},
 	)
 
+	dbMongo := databaseConfig.GetNoSQLDatabaseConnection()
+
 	// inventory endpoint
-	inventoryRepo := invRepo.NewGormRepository(db)
-	inventorySvc := invSvc.NewService(inventoryRepo)
+	inventoryMongoRepo := invRepo.NewMongoRepository(dbMongo)
+	inventorySvc := invSvc.NewService(inventoryMongoRepo)
+	// inventoryRepo := invRepo.NewGormRepository(db)
+	// inventorySvc := invSvc.NewService(inventoryRepo)
 	inventoryCtrl := invHandler.NewController(logger, inventorySvc)
 
 	// endpoint
@@ -155,8 +160,8 @@ func main() {
 	// userRepo := userRepo.NewGormRepository(db)
 
 	// using mongodb
-	dbMongo := databaseConfig.GetNoSQLDatabaseConnection()
 	userMongoRepo := userRepo.NewMongoRepository(dbMongo)
+	// userRepo := userRepo.NewGormRepository(db)
 
 	userService := userService.NewService(logger, userMongoRepo, config.AppDeploymentUrl, config.AppJWTSecret, config.AppEmailVerificationKey, mailjetEmail)
 	userCtrl := userController.NewController(logger, userService)

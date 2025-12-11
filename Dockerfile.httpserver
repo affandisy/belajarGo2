@@ -9,7 +9,7 @@ RUN go build -o http-server main.go
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-COPY .env .
+# COPY .env .
 COPY --from=builder /app/app/http-server/http-server /http-server
 
 ENTRYPOINT ["/http-server"]
