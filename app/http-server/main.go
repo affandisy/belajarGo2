@@ -21,7 +21,8 @@ var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 
 type Config struct {
 	AppHost string `env:"APP_HOST"`
-	AppPort string `env:"APP_PORT"`
+	// AppPort string `env:"APP_PORT"`
+	AppPort string `env:"APP_PORT_HTTP_SERVER"`
 
 	DBDriver        string `env:"DB_DRIVER"`
 	DBMySQLHost     string `env:"DB_MYSQL_HOST"`

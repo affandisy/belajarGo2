@@ -1,0 +1,15 @@
+# Stage 1: Build the Go application binary
+FROM golang:1.24.0 AS builder
+WORKDIR /app
+COPY . .
+WORKDIR /app/app/http-server
+RUN go build -o http-server main.go
+
+# Stage 2: Create a minimal runtime image and running the application
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+COPY .env .
+COPY --from=builder /app/app/http-server/http-server /http-server
+
+ENTRYPOINT ["/http-server"]

@@ -1,8 +1,17 @@
 services:
   echo-server:
-    build: 
-      context: 
-      dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile.echoserver
+    container_name: p-echo-server
     ports:
-      -"9000:8000"
+      - "9050:8000"
+    restart: always
+  http-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.httpserver
+    container_name: p-http-server
+    ports:
+      - "9060:8001"
     restart: always

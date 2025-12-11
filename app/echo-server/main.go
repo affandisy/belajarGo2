@@ -29,8 +29,10 @@ var loggerOption = slog.HandlerOptions{AddSource: true}
 var logger = slog.New(slog.NewJSONHandler(os.Stdout, &loggerOption))
 
 type Config struct {
-	AppHost                 string `env:"APP_HOST"`
-	AppPort                 string `env:"APP_PORT"`
+	// AppHost                 string `env:"APP_HOST"`
+	// AppPort                 string `env:"APP_PORT"`
+	AppHost                 string `env:"APP_PHOST"`
+	AppPort                 string `env:"APP_PORT_ECHO_SERVER"`
 	AppDeploymentUrl        string `env:"APP_DEPLOYMENT_URL"`
 	AppEmailVerificationKey string `env:"APP_EMAIL_VERIFICATION_KEY"`
 	AppJWTSecret            string `env:"APP_JWT_SECRET"`
