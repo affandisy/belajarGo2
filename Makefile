@@ -17,6 +17,15 @@ mock-user:
 mock-notification:
 	mockgen -source service/notification/notificationRepo.go -destination service/notification/mock/notificationMockRepo.go
 
+
+# proto
+inventory-grpc:
+	protoc \
+	--go_out app/grpc-server/controller \
+	--go-grpc_out app/grpc-server/controller \
+	app/grpc-server/controller/proto/*.proto
+
+
 # test
 test-service:
 	go test -v ./service/... -coverprofile=coverage.out -cover -failfast

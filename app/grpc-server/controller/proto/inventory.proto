@@ -1,0 +1,41 @@
+syntax = "proto3";
+package inventory;
+
+option go_package = "./inventory";
+
+enum InventoryStatus {
+    INVENTORY_STATUS_UNSPECIFIED = 0;
+    ACTIVE = 1;
+    BROKEN = 2;
+}
+
+message InventoryRequest {
+    string code = 1;
+    string name = 2;
+    int32 stock = 3;
+    string description = 4;
+    InventoryStatus status = 5;
+}
+
+message InventoryResponse {
+    InventoryRequest inventory = 1;
+}
+
+message InventoryListRequest {
+    int32 page = 1;
+    int32 limit = 2;
+}
+
+message InventoryListResponse {
+    repeated InventoryRequest inventories = 1;
+}
+
+message Empty {}
+
+service InventoryService {
+    rpc Create(InventoryRequest) returns (InventoryResponse);
+    rpc Get(InventoryRequest) returns (InventoryResponse);
+    rpc List(InventoryListRequest) returns (InventoryListResponse);
+    rpc Update(InventoryRequest) returns (InventoryResponse);
+    rpc Delete(InventoryRequest) returns (Empty);
+}
