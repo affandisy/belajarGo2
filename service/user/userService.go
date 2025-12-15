@@ -84,7 +84,9 @@ func (s *service) Register(user User) (id string, err error) {
 
 	verificationCode := fmt.Sprintf("%v|%v", user.Email, expAt)
 	verificationCodeEncrypt, _ := goshortcute.AESCBCEncrypt([]byte(verificationCode), []byte(s.appEmailVerificationKey))
-	activationLink := s.appDeploymentUrl + "/users/email-verification/" + verificationCodeEncrypt
+	// activationLink := s.appDeploymentUrl + "/users/email-verification/" + verificationCodeEncrypt
+	verifCode := goshortcute.StringtoBase64Encode(verificationCodeEncrypt)
+	activationLink := s.appDeploymentUrl + "/users/email-verification/" + verifCode
 
 	_ = s.notifRepo.SendEmail(user.Fullname, user.Email, SubjectRegisterAccount, fmt.Sprintf(EmailBodyRegisterAccount, user.Fullname, activationLink, verificationCodeTTL))
 
@@ -93,7 +95,9 @@ func (s *service) Register(user User) (id string, err error) {
 }
 
 func (s *service) VerifyEmail(verificationCodeEncrypt string) (err error) {
-	verificationCodeDecrypt, err := goshortcute.AESCBCDecrypt([]byte(verificationCodeEncrypt), []byte(s.appEmailVerificationKey))
+	// verificationCodeDecrypt, err := goshortcute.AESCBCDecrypt([]byte(verificationCodeEncrypt), []byte(s.appEmailVerificationKey))
+	verifCodeDecode := goshortcute.StringtoBase64Decode(verificationCodeEncrypt)
+	verificationCodeDecrypt, err := goshortcute.AESCBCDecrypt([]byte(verifCodeDecode), []byte(s.appEmailVerificationKey))
 	if err != nil {
 		s.logger.Error("verify email err", slog.Any("err", err.Error()))
 		return errors.New("invalid or expired url")
